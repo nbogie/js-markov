@@ -1,0 +1,24 @@
+      body,
+      div {
+        margin: 10px;
+        padding: 10px;
+      }
+      #input {
+        color: gray;
+      }
+      #output {
+        color:blue;
+        font-weight: bold;
+      }
+      #history div{
+          border-radius: 10px;
+        background-color: #F0F0F0;
+      }
+      li {
+        border-radius: 10px;
+        background-color: #D0D0D0;
+        padding: 6px;
+        width: 50%;
+        margin: 2px;
+        list-style: none;
+      }

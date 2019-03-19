@@ -26,7 +26,7 @@ function regenerate() {
 
   let histElem = document.querySelector('#history');
   let oneHistElem = document.createElement('div');
-  oneHistElem.innerTextcreateTextNode = outputElem.innerText;
+  oneHistElem.innerText = outputElem.innerText;
   histElem.prepend(oneHistElem);
 }
 
