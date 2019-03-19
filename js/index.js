@@ -1,5 +1,5 @@
 //https://www.gutenberg.org/browse/scores/top
-
+//TODO: allow the user to explore the generation with a word-selection GUI (with auto-play if they are inactive) 
 let dict;
 let previousTexts;
 let generator;
@@ -79,6 +79,7 @@ function setup() {
   noLoop();
 }
 
+//TODO: don't regenerate indices, cache them
 function regenerateWith(config){
   if (gConfig !== config){
     gConfig = config;
