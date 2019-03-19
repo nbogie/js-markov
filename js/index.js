@@ -5,6 +5,8 @@ let previousTexts;
 let generator;
 let outputGenerator;
 let outputElem;
+let gConfig;
+let gConfigs;
 
 function* createOutputGenerator(dict){
   let current = getStartWord(dict);
@@ -12,19 +14,19 @@ function* createOutputGenerator(dict){
     let choices = dict[current];
     yield {word: current, choices: choices};
     current = random(choices);
-    //continue?  if (current.indexOf('.') > 0 && out.length > 8) {
   }
 }
 
 function regenerate() {
-  let txt = generateSample(dict, 80);
-  outputElem.innerText = txt;
-
-  previousTexts.push(txt);
+  outputGenerator = createOutputGenerator(dict);
+  outputElem.innerText = '';
+  generateSample(outputGenerator, 80, gConfig.sep);
+  
+  previousTexts.push(outputElem.innerText);
 
   let histElem = document.querySelector('#history');
   let oneHistElem = document.createElement('div');
-  oneHistElem.innerTextcreateTextNode = txt;
+  oneHistElem.innerTextcreateTextNode = outputElem.innerText;
   histElem.prepend(oneHistElem);
 }
 
@@ -47,7 +49,7 @@ function nextClicked() {
   let data = outputGenerator.next().value;
   let spanNode = document.createElement("span");
   displayChoices(data.word, data.choices);
-  spanNode.innerHTML = `${data.word} `;
+  spanNode.innerHTML = `${data.word}`;
   outputElem.appendChild(spanNode);
 }
 
@@ -56,53 +58,82 @@ function setup() {
 
   outputElem = document.querySelector('#output');
 
-  document.querySelector('#genButton').addEventListener('click', regenerate);
+  document.querySelector('#genEmes2Button').addEventListener('click', regenerateWithEmes2);
+  document.querySelector('#genEmes3Button').addEventListener('click', regenerateWithEmes3);
+  document.querySelector('#genWordsButton').addEventListener('click', regenerateWithWords);
   document.querySelector('#nextButton').addEventListener('click', nextClicked);
   document.querySelector('#resetButton').addEventListener('click', resetClicked);
 
   previousTexts = [];
+  gConfigs = {
+    words: {sep: ' ', genGen: wordPairGenerator},
+    segments2: {sep: '', segSize: 2, genGen: segmentPairGenerator},
+    segments3: {sep: '', segSize: 3, genGen: segmentPairGenerator},
+  };
 
-  let inputText = document.querySelector('#input').innerText;
-
-  generator = genWordPairs(inputText);
-
-  dict = buildInput(generator);
-
-  outputGenerator = createOutputGenerator(dict);
-
+  gConfig = gConfigs.words;
+  
+  rebuildIx();
   regenerate();
+
   noLoop();
+}
+
+function regenerateWith(config){
+  if (gConfig !== config){
+    gConfig = config;
+    rebuildIx();
+  }
+  regenerate();
+}
+
+function regenerateWithEmes2(){
+  regenerateWith(gConfigs.segments2);
+}
+function regenerateWithEmes3(){
+  regenerateWith(gConfigs.segments3);
+}
+function regenerateWithWords(){
+  regenerateWith(gConfigs.words);
+}
+
+function rebuildIx(){
+  let inputText = document.querySelector('#input').innerText;
+  generator = gConfig.genGen(inputText, gConfig.segSize);
+  dict = buildInput(generator);
 }
 
 function getStartWord(dict) {
   return random(Object.keys(dict).filter(w => w.charAt(0).toUpperCase() == w.charAt(0)));
 }
 
-function generateSample(dict, sampleLength) {
-  let out = [];
-  let current = getStartWord(dict);
+function generateSample(gen, sampleLength, gSpacer) {
+  
   for (let i = 0; i < sampleLength; i++) {
-    out.push(current);
-    if (current.indexOf('.') > 0 && out.length > 8) {
+    //generator is infinite.
+    let data = outputGenerator.next().value;
+    
+    if (data.word.indexOf('.') > 0 && i.length > 8) {
       break;
     }
-    let choices = dict[current];
-    current = random(choices);
+    let spanNode = document.createElement("span");
+    spanNode.innerHTML = `${data.word}${gSpacer}`;
+    outputElem.appendChild(spanNode);
   }
-  return out.join(" ");
 }
-function* genWordPairs(txt) {
+
+function* wordPairGenerator(txt) {
   let words = txt.split(' ');
   for (let i = 0; i < words.length - 1; i++) {
     yield [words[i], words[i + 1]];
   }
 }
 
-function* genSegmentPairs(txt) {
-  for (let i = 0; i < txt.length - 3; i++) {
+function* segmentPairGenerator(txt, segSize) {
+  for (let i = 0; i < txt.length - (segSize * 2) + 1; i++) {
     yield [
-      txt[i] + txt[i + 1], 
-      txt[i+2]+txt[i+3]
+      txt.slice(i, i+segSize), 
+      txt.slice(i+segSize, i+2*segSize)
     ];
   }
 }
