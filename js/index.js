@@ -3,32 +3,55 @@
 let dict;
 let previousTexts;
 let generator;
+let outputGenerator;
 let outputElem;
-  
-function regenerate(){
+
+function* createOutputGenerator(dict){
+  let current = getStartWord(dict);
+  while(true){
+    let choices = dict[current];
+    yield {word: current, choices: choices};
+    current = random(choices);
+    //continue?  if (current.indexOf('.') > 0 && out.length > 8) {
+  }
+}
+
+function regenerate() {
   let txt = generateSample(dict, 80);
   outputElem.innerText = txt;
-  
+
   previousTexts.push(txt);
-  
+
   let histElem = document.querySelector('#history');
   let oneHistElem = document.createElement('div');
   oneHistElem.innerTextcreateTextNode = txt;
   histElem.prepend(oneHistElem);
 }
 
-function resetClicked(){
-  outputElem.innerText = "-";  
+function resetClicked() {
+  outputElem.innerText = "";
+  outputGenerator = createOutputGenerator(dict);
 }
 
-function nextClicked(){
-  let [a,b] = generator.next().value;
+function displayChoices(word, choices){
+  let choicesElem = document.querySelector('#choices');
+  choicesElem.innerText = '';
+  Object.keys(choices).forEach(k => {
+    let li = document.createElement('li');
+    li.innerText = choices[k];
+    choicesElem.appendChild(li);
+  });
+}
+
+function nextClicked() {
+  let data = outputGenerator.next().value;
   let spanNode = document.createElement("span");
-  spanNode.innerHTML = `${a}-${b}<br/>`;
+  displayChoices(data.word, data.choices);
+  spanNode.innerHTML = `${data.word} `;
   outputElem.appendChild(spanNode);
 }
 
-function setup(){
+function setup() {
   createCanvas(windowWidth, windowHeight);
 
   outputElem = document.querySelector('#output');
@@ -40,26 +63,27 @@ function setup(){
   previousTexts = [];
 
   let inputText = document.querySelector('#input').innerText;
-  
+
   generator = genPairs(inputText);
-  
-  dict = buildInput(inputText);
-  
+
+  dict = buildInput(generator);
+
+  outputGenerator = createOutputGenerator(dict);
+
   regenerate();
-  
   noLoop();
 }
 
-function getStartWord(dict){
+function getStartWord(dict) {
   return random(Object.keys(dict).filter(w => w.charAt(0).toUpperCase() == w.charAt(0)));
 }
 
-function generateSample(dict, sampleLength){
+function generateSample(dict, sampleLength) {
   let out = [];
   let current = getStartWord(dict);
-  for(let i = 0; i < sampleLength; i++){
+  for (let i = 0; i < sampleLength; i++) {
     out.push(current);
-    if (current.indexOf('.') > 0 && out.length > 8){
+    if (current.indexOf('.') > 0 && out.length > 8) {
       break;
     }
     let choices = dict[current];
@@ -67,28 +91,30 @@ function generateSample(dict, sampleLength){
   }
   return out.join(" ");
 }
-function* genPairs(txt){
+function* genPairs(txt) {
   let words = txt.split(' ');
-  for (let i = 0; i < words.length - 1; i++){
-    yield [  words[i], words[i+1]  ];
+  for (let i = 0; i < words.length - 1; i++) {
+    yield [words[i], words[i + 1]];
   }
   return dict;
 }
 
-function buildInput(txt){
-  let words = txt.split(' ');
+function buildInput(generator) {
   let dict = {};
-  for (let i = 0; i < words.length - 1; i++){
-    if (dict[words[i]]){
-      dict[words[i]].push(words[i+1]);
-    }  else {
-      dict[words[i]] = [words[i+1]];
+  let next = generator.next();
+  while (!next.done) {
+    let [w1, w2] = next.value;
+    if (dict[w1]) {
+      dict[w1].push(w2);
+    } else {
+      dict[w1] = [w2];
     }
+    next = generator.next();
   }
   return dict;
 }
 
-function draw(){
+function draw() {
   fill(random(255));
   rect(random(width), random(height), 20, 20);
 }
