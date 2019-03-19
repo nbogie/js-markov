@@ -64,7 +64,7 @@ function setup() {
 
   let inputText = document.querySelector('#input').innerText;
 
-  generator = genPairs(inputText);
+  generator = genWordPairs(inputText);
 
   dict = buildInput(generator);
 
@@ -91,12 +91,20 @@ function generateSample(dict, sampleLength) {
   }
   return out.join(" ");
 }
-function* genPairs(txt) {
+function* genWordPairs(txt) {
   let words = txt.split(' ');
   for (let i = 0; i < words.length - 1; i++) {
     yield [words[i], words[i + 1]];
   }
-  return dict;
+}
+
+function* genSegmentPairs(txt) {
+  for (let i = 0; i < txt.length - 3; i++) {
+    yield [
+      txt[i] + txt[i + 1], 
+      txt[i+2]+txt[i+3]
+    ];
+  }
 }
 
 function buildInput(generator) {
