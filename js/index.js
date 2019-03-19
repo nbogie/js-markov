@@ -1,27 +1,52 @@
+//https://www.gutenberg.org/browse/scores/top
+
 let dict;
 let previousTexts;
-
+let generator;
+let outputElem;
+  
 function regenerate(){
-  let outputElem = document.querySelector('#output');
-  let txt = generateSample(dict, 40);
+  let txt = generateSample(dict, 80);
   outputElem.innerText = txt;
   
   previousTexts.push(txt);
   
   let histElem = document.querySelector('#history');
   let oneHistElem = document.createElement('div');
-
-  oneHistElem.innerText = txt;
+  oneHistElem.innerTextcreateTextNode = txt;
   histElem.prepend(oneHistElem);
+}
+
+function resetClicked(){
+  outputElem.innerText = "-";  
+}
+
+function nextClicked(){
+  let [a,b] = generator.next().value;
+  let spanNode = document.createElement("span");
+  spanNode.innerHTML = `${a}-${b}<br/>`;
+  outputElem.appendChild(spanNode);
 }
 
 function setup(){
   createCanvas(windowWidth, windowHeight);
-  previousTexts = [];
-  let inputText = document.querySelector('#input').innerText;
-  dict = buildInput(inputText);
+
+  outputElem = document.querySelector('#output');
+
   document.querySelector('#genButton').addEventListener('click', regenerate);
+  document.querySelector('#nextButton').addEventListener('click', nextClicked);
+  document.querySelector('#resetButton').addEventListener('click', resetClicked);
+
+  previousTexts = [];
+
+  let inputText = document.querySelector('#input').innerText;
+  
+  generator = genPairs(inputText);
+  
+  dict = buildInput(inputText);
+  
   regenerate();
+  
   noLoop();
 }
 
@@ -41,6 +66,13 @@ function generateSample(dict, sampleLength){
     current = random(choices);
   }
   return out.join(" ");
+}
+function* genPairs(txt){
+  let words = txt.split(' ');
+  for (let i = 0; i < words.length - 1; i++){
+    yield [  words[i], words[i+1]  ];
+  }
+  return dict;
 }
 
 function buildInput(txt){
