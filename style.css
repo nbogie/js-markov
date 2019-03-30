@@ -10,6 +10,19 @@
         color:blue;
         font-weight: bold;
       }
+      .jumbotron span:first-child {
+        font-size:larger;
+        font-weight: 900;         
+      }
+      .jumbotron span:last-child {
+        font-size:larger;
+        font-weight: 900;
+        color: red;
+        border:1px solid black;
+         
+        padding: 3px;
+        margin: 2px;
+      }
       #history div{
           border-radius: 10px;
         background-color: #F0F0F0;

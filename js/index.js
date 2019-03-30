@@ -77,6 +77,8 @@ function setup() {
   regenerate();
 
   noLoop();
+  resetClicked();
+  setInterval(nextClicked, 500);
 }
 
 //TODO: don't regenerate indices, cache them
