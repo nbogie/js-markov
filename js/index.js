@@ -1,7 +1,7 @@
 //https://www.gutenberg.org/browse/scores/top
 //TODO: allow the user to explore the generation with a word-selection GUI (with auto-play if they are inactive) 
-//TODO: remove p5 dependency
 //TODO: add fast/slow/pause buttons
+//TODO: switch to ES module
 let dict;
 let previousTexts;
 let generator;
@@ -10,7 +10,6 @@ let outputElem;
 let gConfig;
 let gConfigs;
 let gSourceText;  //The source text will be saved here once loaded.
-
 
 function* createOutputGenerator(dict) {
   let current = getStartWord(dict);
@@ -28,7 +27,7 @@ function regenerate() {
 
   previousTexts.push(outputElem.innerText);
 
-  let histElem = document.querySelector('#history');
+  let histElem = getElementByIdOrFail('history');
   let oneHistElem = document.createElement('div');
   oneHistElem.innerText = outputElem.innerText;
   histElem.prepend(oneHistElem);
@@ -40,8 +39,8 @@ function resetClicked() {
 }
 
 function displayChoices(word, choices) {
-  let choicesElem = document.querySelector('#choices');
-  let choicesCountElem = document.querySelector('#choicesCount');
+  let choicesElem = getElementByIdOrFail('choices');
+  let choicesCountElem = getElementByIdOrFail('choicesCount');
   choicesElem.innerText = '';
   const allChoices = Object.keys(choices);
   allChoices.slice(0, 10).forEach(k => {
@@ -68,22 +67,18 @@ async function fetchAndStoreSourceText() {
     gSourceText = undefined;
   }
 }
-function setup() {
-  createCanvas(windowWidth, windowHeight);
-
-
-  noLoop();
+function start() {
 
   fetchAndStoreSourceText().then(() => {
     if (gSourceText === undefined) {
       return;
     }
-    outputElem = document.querySelector('#output');
-    document.querySelector('#genEmes2Button').addEventListener('click', regenerateWithEmes2);
-    document.querySelector('#genEmes3Button').addEventListener('click', regenerateWithEmes3);
-    document.querySelector('#genWordsButton').addEventListener('click', regenerateWithWords);
-    document.querySelector('#nextButton').addEventListener('click', nextClicked);
-    document.querySelector('#resetButton').addEventListener('click', resetClicked);
+    outputElem = getElementByIdOrFail('output');
+    getElementByIdOrFail('genEmes2Button').addEventListener('click', regenerateWithEmes2);
+    getElementByIdOrFail('genEmes3Button').addEventListener('click', regenerateWithEmes3);
+    getElementByIdOrFail('genWordsButton').addEventListener('click', regenerateWithWords);
+    getElementByIdOrFail('nextButton').addEventListener('click', nextClicked);
+    getElementByIdOrFail('resetButton').addEventListener('click', resetClicked);
 
     previousTexts = [];
     gConfigs = {
@@ -174,7 +169,18 @@ function buildInput(generator) {
   return dict;
 }
 
-function draw() {
-  fill(random(255));
-  rect(random(width), random(height), 20, 20);
+function getElementByIdOrFail(id) {
+  const elem = document.getElementById(id);
+  if (!elem) {
+    throw new Error("Can't find expected element with id: " + id);
+  }
+  return elem;
 }
+
+
+function random(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+
+window.onload = start;
