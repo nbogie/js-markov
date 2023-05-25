@@ -10,6 +10,35 @@ let gConfig;
 let gConfigs;
 let gSourceText;  //The source text will be saved here once loaded.
 
+
+function start() {
+  fetchAndStoreSourceText().then(() => {
+    if (gSourceText === undefined) {
+      return;
+    }
+    outputElem = getElementByIdOrFail('output');
+    getElementByIdOrFail('genEmes2Button').addEventListener('click', regenerateWithEmes2);
+    getElementByIdOrFail('genEmes3Button').addEventListener('click', regenerateWithEmes3);
+    getElementByIdOrFail('genWordsButton').addEventListener('click', regenerateWithWords);
+    getElementByIdOrFail('nextButton').addEventListener('click', nextClicked);
+    getElementByIdOrFail('resetButton').addEventListener('click', resetClicked);
+
+    previousTexts = [];
+    gConfigs = {
+      words: { sep: ' ', genGen: wordPairGenerator },
+      segments2: { sep: '', segSize: 2, genGen: segmentPairGenerator },
+      segments3: { sep: '', segSize: 3, genGen: segmentPairGenerator },
+    };
+
+    gConfig = gConfigs.words;
+
+    rebuildIx();
+    regenerate();
+    resetClicked();
+    setInterval(nextClicked, 500);
+  })
+}
+
 /**
  * @param {{ [x: string]: any; }} dict
  */
@@ -73,36 +102,6 @@ async function fetchAndStoreSourceText() {
     gSourceText = undefined;
   }
 }
-function start() {
-
-  fetchAndStoreSourceText().then(() => {
-    if (gSourceText === undefined) {
-      return;
-    }
-    outputElem = getElementByIdOrFail('output');
-    getElementByIdOrFail('genEmes2Button').addEventListener('click', regenerateWithEmes2);
-    getElementByIdOrFail('genEmes3Button').addEventListener('click', regenerateWithEmes3);
-    getElementByIdOrFail('genWordsButton').addEventListener('click', regenerateWithWords);
-    getElementByIdOrFail('nextButton').addEventListener('click', nextClicked);
-    getElementByIdOrFail('resetButton').addEventListener('click', resetClicked);
-
-    previousTexts = [];
-    gConfigs = {
-      words: { sep: ' ', genGen: wordPairGenerator },
-      segments2: { sep: '', segSize: 2, genGen: segmentPairGenerator },
-      segments3: { sep: '', segSize: 3, genGen: segmentPairGenerator },
-    };
-
-    gConfig = gConfigs.words;
-
-    rebuildIx();
-    regenerate();
-    resetClicked();
-    setInterval(nextClicked, 500);
-  })
-
-}
-
 //TODO: don't regenerate indices, cache them
 function regenerateWith(config) {
   if (gConfig !== config) {
