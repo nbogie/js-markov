@@ -1,7 +1,6 @@
 //https://www.gutenberg.org/browse/scores/top
 //TODO: allow the user to explore the generation with a word-selection GUI (with auto-play if they are inactive) 
 //TODO: add fast/slow/pause buttons
-//TODO: switch to ES module
 let dict;
 let previousTexts;
 let generator;
