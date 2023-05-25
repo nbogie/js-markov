@@ -10,6 +10,9 @@ let gConfig;
 let gConfigs;
 let gSourceText;  //The source text will be saved here once loaded.
 
+/**
+ * @param {{ [x: string]: any; }} dict
+ */
 function* createOutputGenerator(dict) {
   let current = getStartWord(dict);
   while (true) {
@@ -22,12 +25,12 @@ function* createOutputGenerator(dict) {
 function regenerate() {
   outputGenerator = createOutputGenerator(dict);
   outputElem.innerText = '';
-  generateSample(outputGenerator, 80, gConfig.sep);
+  generateSample(80, gConfig.sep);
 
   previousTexts.push(outputElem.innerText);
 
-  let histElem = getElementByIdOrFail('history');
-  let oneHistElem = document.createElement('div');
+  const histElem = getElementByIdOrFail('history');
+  const oneHistElem = document.createElement('div');
   oneHistElem.innerText = outputElem.innerText;
   histElem.prepend(oneHistElem);
 }
@@ -37,13 +40,16 @@ function resetClicked() {
   outputGenerator = createOutputGenerator(dict);
 }
 
-function displayChoices(word, choices) {
-  let choicesElem = getElementByIdOrFail('choices');
-  let choicesCountElem = getElementByIdOrFail('choicesCount');
+/**
+ * @param {{ [x: string]: string; }} choices
+ */
+function displayChoices(choices) {
+  const choicesElem = getElementByIdOrFail('choices');
+  const choicesCountElem = getElementByIdOrFail('choicesCount');
   choicesElem.innerText = '';
   const allChoices = Object.keys(choices);
   allChoices.slice(0, 10).forEach(k => {
-    let li = document.createElement('li');
+    const li = document.createElement('li');
     li.innerText = choices[k];
     choicesElem.appendChild(li);
   });
@@ -51,12 +57,13 @@ function displayChoices(word, choices) {
 }
 
 function nextClicked() {
-  let data = outputGenerator.next().value;
-  let spanNode = document.createElement("span");
-  displayChoices(data.word, data.choices);
+  const data = outputGenerator.next().value;
+  const spanNode = document.createElement("span");
+  displayChoices(data.choices);
   spanNode.innerHTML = `${data.word}${gConfig.sep}`;
   outputElem.appendChild(spanNode);
 }
+
 async function fetchAndStoreSourceText() {
   try {
     const response = await fetch("./source.txt");
@@ -124,23 +131,34 @@ function getStartWord(dict) {
   return random(Object.keys(dict).filter(w => w.charAt(0).toUpperCase() == w.charAt(0)));
 }
 
-function generateSample(gen, sampleLength, spacer) {
+/**
+ * @param {number} sampleLength
+ * @param {string} spacer
+ */
+function generateSample(sampleLength, spacer) {
   for (let i = 0; i < sampleLength; i++) {
     //(The generator is infinite.)
-    let { word } = outputGenerator.next().value;
-    let spanNode = document.createElement("span");
+    const { word } = outputGenerator.next().value;
+    const spanNode = document.createElement("span");
     spanNode.innerHTML = `${word}${spacer}`;
     outputElem.appendChild(spanNode);
   }
 }
 
+/**
+ * @param {string} txt
+ */
 function* wordPairGenerator(txt) {
-  let words = txt.split(' ');
+  const words = txt.split(' ');
   for (let i = 0; i < words.length - 1; i++) {
     yield [words[i], words[i + 1]];
   }
 }
 
+/**
+ * @param {string} txt
+ * @param {number} segSize
+ */
 function* segmentPairGenerator(txt, segSize) {
   for (let i = 0; i < txt.length - (segSize * 2) + 1; i++) {
     yield [
@@ -150,8 +168,11 @@ function* segmentPairGenerator(txt, segSize) {
   }
 }
 
+/**
+ * @param {{ next: () => {value: [string, string], done: boolean}; }} generator
+ */
 function buildInput(generator) {
-  let dict = {};
+  const dict = {};
   let next = generator.next();
   while (!next.done) {
     let [w1, w2] = next.value;
@@ -165,6 +186,10 @@ function buildInput(generator) {
   return dict;
 }
 
+/**
+ * @param {string} id
+ * @returns element with given id
+ */
 function getElementByIdOrFail(id) {
   const elem = document.getElementById(id);
   if (!elem) {
@@ -174,6 +199,10 @@ function getElementByIdOrFail(id) {
 }
 
 
+/**
+ * @param {any[]} arr
+ * @returns one element of the given array, at random. Or undefined if the array is empty.
+ */
 function random(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
