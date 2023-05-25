@@ -1,6 +1,5 @@
 //https://www.gutenberg.org/browse/scores/top
 //TODO: allow the user to explore the generation with a word-selection GUI (with auto-play if they are inactive) 
-//TODO: add fast/slow/pause buttons
 let dict;
 let previousTexts;
 let generator;
@@ -9,7 +8,7 @@ let outputElem;
 let gConfig;
 let gConfigs;
 let gSourceText;  //The source text will be saved here once loaded.
-
+let gIntervalTag; //allows us to clear the timer.
 
 function start() {
   fetchAndStoreSourceText().then(() => {
@@ -22,6 +21,9 @@ function start() {
     getElementByIdOrFail('genWordsButton').addEventListener('click', regenerateWithWords);
     getElementByIdOrFail('nextButton').addEventListener('click', nextClicked);
     getElementByIdOrFail('resetButton').addEventListener('click', resetClicked);
+    getElementByIdOrFail('slowButton').addEventListener('click', () => switchSpeed(2000));
+    getElementByIdOrFail('mediumButton').addEventListener('click', () => switchSpeed(500));
+    getElementByIdOrFail('fastButton').addEventListener('click', () => switchSpeed(100));
 
     previousTexts = [];
     gConfigs = {
@@ -35,7 +37,7 @@ function start() {
     rebuildIx();
     regenerate();
     resetClicked();
-    setInterval(nextClicked, 500);
+    gIntervalTag = setInterval(nextClicked, 500);
   })
 }
 
@@ -77,7 +79,7 @@ function displayChoices(choices) {
   const choicesCountElem = getElementByIdOrFail('choicesCount');
   choicesElem.innerText = '';
   const allChoices = Object.keys(choices);
-  allChoices.slice(0, 10).forEach(k => {
+  allChoices.slice(0, 40).forEach(k => {
     const li = document.createElement('li');
     li.innerText = choices[k];
     choicesElem.appendChild(li);
@@ -197,7 +199,14 @@ function getElementByIdOrFail(id) {
   return elem;
 }
 
+function switchSpeed(newIntervalInMillis) {
+  if (gIntervalTag !== undefined) {
+    clearInterval(gIntervalTag);
+    gIntervalTag = setInterval(nextClicked, newIntervalInMillis);
+  }
 
+
+}
 /**
  * @param {any[]} arr
  * @returns one element of the given array, at random. Or undefined if the array is empty.
