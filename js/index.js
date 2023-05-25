@@ -47,7 +47,7 @@ function displayChoices(word, choices) {
     li.innerText = choices[k];
     choicesElem.appendChild(li);
   });
-  choicesCountElem.innerHTML = allChoices.length;
+  choicesCountElem.innerHTML = "" + allChoices.length;
 }
 
 function nextClicked() {
@@ -124,15 +124,12 @@ function getStartWord(dict) {
   return random(Object.keys(dict).filter(w => w.charAt(0).toUpperCase() == w.charAt(0)));
 }
 
-function generateSample(gen, sampleLength, gSpacer) {
+function generateSample(gen, sampleLength, spacer) {
   for (let i = 0; i < sampleLength; i++) {
-    //generator is infinite.
-    let data = outputGenerator.next().value;
-    if (data.word.indexOf('.') > 0 && i.length > 8) {
-      break;
-    }
+    //(The generator is infinite.)
+    let { word } = outputGenerator.next().value;
     let spanNode = document.createElement("span");
-    spanNode.innerHTML = `${data.word}${gSpacer}`;
+    spanNode.innerHTML = `${word}${spacer}`;
     outputElem.appendChild(spanNode);
   }
 }
