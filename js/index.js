@@ -10,6 +10,7 @@ let gConfigs;
 let gSourceText;  //The source text will be saved here once loaded.
 let gIntervalTag; //allows us to clear the timer.
 
+
 function start() {
   fetchAndStoreSourceText().then(() => {
     if (gSourceText === undefined) {
@@ -95,12 +96,30 @@ function nextClicked() {
   outputElem.appendChild(spanNode);
 }
 
+/**
+ * Fetch the http response's body text when GETting the given URL.
+ * @param {string} url
+ */
+async function fetchText(url) {
+  const response = await fetch(url);
+  const statusCode = response.status;
+  if (statusCode >= 200 && statusCode < 400) {
+    const text = await response.text();
+    return text;
+  } else {
+    throw new Error(`Unhappy status code ${statusCode} when fetching text from URL: ${url}`);
+  }
+}
+
 async function fetchAndStoreSourceText() {
   try {
-    const response = await fetch("./source.txt");
-    gSourceText = await response.text();
+    const sourceURLs = ["./sourceTexts/sourceMobyDick.txt", "./sourceTexts/sourceGrimm.txt", "./sourceTexts/sourceTheIliad.txt"]
+    const fetches = sourceURLs.map(fetchText);
+    const texts = await Promise.all(fetches);
+    gSourceText = texts.join("\n\n");
   } catch (error) {
-    console.error("Problem loading text");
+    console.error("Problem loading text(s)", error);
+    alert("Problem loading text(s): " + error.message)
     gSourceText = undefined;
   }
 }
