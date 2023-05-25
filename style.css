@@ -3,6 +3,10 @@ div {
     margin: 10px;
     padding: 10px;
 }
+body {
+    width: calc(min(100vw, 800px));
+    margin: 0 auto;
+}
 #input {
     color: gray;
 }
@@ -27,11 +31,15 @@ div {
     border-radius: 10px;
     background-color: #f0f0f0;
 }
+ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
 li {
     border-radius: 10px;
     background-color: #d0d0d0;
     padding: 6px;
-    width: 50%;
     margin: 2px;
     list-style: none;
 }
